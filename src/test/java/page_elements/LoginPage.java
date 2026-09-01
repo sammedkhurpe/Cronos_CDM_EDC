@@ -3,6 +3,9 @@ package page_elements;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.AriaRole;
+import com.microsoft.playwright.options.SelectOption;
+
+import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
 public class LoginPage 
 {
@@ -18,6 +21,8 @@ public class LoginPage
 	private Locator securityanswer;
 	private Locator submit;
 	private Locator cancel;
+	private Locator invalidUserMessage;
+	private Locator invalidPasswordMessage;
 	
 	public LoginPage (Page page)
 	{
@@ -28,11 +33,13 @@ public class LoginPage
 		password=page.getByRole(AriaRole.TEXTBOX, new Page.GetByRoleOptions().setName("password"));
 		signin=page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("SIGN IN"));
 		terminate=page.locator("//md-checkbox[@name=\"confirmCheck\"]");
-		forgotpassword=page.getByLabel("Forgot Password?");
-		securityquestion=page.getByLabel("Security Question?*");
+		forgotpassword=page.getByText("Forgot Password?");
+		securityquestion=page.locator("//md-select[@aria-label=\"Security Question?*\"]");
 		securityanswer=page.locator("//input[@name=\"securityAnswer\"]");
 		submit=page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("SUBMIT"));
 		cancel=page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("CANCEL"));
+		invalidUserMessage=page.getByText("Couldn't find your account ");
+		invalidPasswordMessage=page.getByText("Invalid password.");
 	}
 	
 	public void username(String username)
@@ -71,7 +78,9 @@ public class LoginPage
 	
 	public void securityquestion()
 	{
-		this.securityquestion.selectOption("Who was your childhood hero?");
+//		this.securityquestion.selectOption(new SelectOption().setLabel("Who was your childhood hero?"));
+		this.securityquestion.click();
+		this.page.getByText("What is name of your grand mother?", new Page.GetByTextOptions().setExact(true)).click();
 	}
 	
 	public void securityanswer(String securityanswer)
@@ -87,5 +96,20 @@ public class LoginPage
 	public void cancel()
 	{
 		this.cancel.click();
+	}
+	
+	public void verifyinvalidUserMessage()
+	{
+		assertThat(this.invalidUserMessage).isVisible();
+	}
+	
+	public void verifyinvalidPasswordMessage()
+	{
+		assertThat(this.invalidPasswordMessage).isVisible();
+	}
+	
+	public void pageTitle()
+	{
+		assertThat(this.page).hasTitle("Cronos");
 	}
 }
